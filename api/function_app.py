@@ -3,11 +3,9 @@ import logging
 from azure.data.tables import TableServiceClient  # Updated import path
 from azure.data.tables import TableEntity  # Updated import path
 import json
-import os
-from dotenv import load_dotenv  # Import load_dotenv from python-dotenv
+import os  # Import the os module at the beginning of your file
 
-# Load environment variables from .env file
-load_dotenv()
+
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -16,8 +14,7 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     # Connection string for Azure Cosmos DB Table API
-    connection_string = os.getenv('AZURE_CONNECTION_STRING')
-
+    connection_string = os.environ['AZURE_CONNECTION_STRING']
     # Create TableServiceClient
     table_service = TableServiceClient.from_connection_string(conn_str=connection_string)
 
