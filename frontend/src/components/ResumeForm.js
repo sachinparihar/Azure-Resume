@@ -5,10 +5,24 @@ import fileSaver from 'file-saver';
 
 const ResumeForm = () => {
   const [resumeData, setResumeData] = useState({
-    name: '',
+    basics: {
+      name: '',
+      label: '',
+      email: '',
+      website: '',
+      summary: '',
+      location: {
+        city: '',
+        countryCode: '',
+        region: ''
+      },
+      profiles: []
+    },
+    work: [],
+    education: [],
+    awards: [],
     skills: [],
-    email: '',
-    experience: '',
+    interests: []
   });
   const [error, setError] = useState(null);
   const [downloadLink, setDownloadLink] = useState(null);
@@ -42,7 +56,44 @@ const ResumeForm = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setResumeData((prevData) => ({ ...prevData, [name]: value }));
+    setResumeData((prevData) => {
+      if (name === 'name') {
+        prevData.basics.name = value;
+      } else if (name === 'label') {
+        prevData.basics.label = value;
+      } else if (name === 'email') {
+        prevData.basics.email = value;
+      } else if (name === 'website') {
+        prevData.basics.website = value;
+      } else if (name === 'ummary') {
+        prevData.basics.summary = value;
+      } else if (name === 'city') {
+        prevData.basics.location.city = value;
+      } else if (name === 'countryCode') {
+        prevData.basics.location.countryCode = value;
+      } else if (name === 'egion') {
+        prevData.basics.location.region = value;
+      } else if (name.startsWith('profile-')) {
+        const profileIndex = parseInt(name.split('-')[1]);
+        prevData.basics.profiles[profileIndex] = value;
+      } else if (name.startsWith('work-')) {
+        const workIndex = parseInt(name.split('-')[1]);
+        prevData.work[workIndex] = value;
+      } else if (name.startsWith('education-')) {
+        const educationIndex = parseInt(name.split('-')[1]);
+        prevData.education[educationIndex] = value;
+      } else if (name.startsWith('award-')) {
+        const awardIndex = parseInt(name.split('-')[1]);
+        prevData.awards[awardIndex] = value;
+      } else if (name.startsWith('skill-')) {
+        const skillIndex = parseInt(name.split('-')[1]);
+        prevData.skills[skillIndex] = value;
+      } else if (name.startsWith('interest-')) {
+        const interestIndex = parseInt(name.split('-')[1]);
+        prevData.interests[interestIndex] = value;
+      }
+      return prevData;
+    });
   };
 
   const handleDownloadPdf = () => {
@@ -57,30 +108,98 @@ const ResumeForm = () => {
     <form onSubmit={handleSubmit}>
       <label>
         Name:
-        <input type="text" name="name" value={resumeData.name} onChange={handleChange} />
+        <input type="text" name="name" value={resumeData.basics.name} onChange={handleChange} />
       </label>
       <br />
       <label>
-        Skills:
-        <input type="text" name="skills" value={resumeData.skills} onChange={handleChange} />
+        Label:
+        <input type="text" name="label" value={resumeData.basics.label} onChange={handleChange} />
       </label>
       <br />
       <label>
         Email:
-        <input type="email" name="email" value={resumeData.email} onChange={handleChange} />
+        <input type="email" name="email" value={resumeData.basics.email} onChange={handleChange} />
       </label>
       <br />
       <label>
-        Experience:
-        <input type="text" name="experience" value={resumeData.experience} onChange={handleChange} />
+        Website:
+        <input type="text" name="website" value={resumeData.basics.website} onChange={handleChange} />
       </label>
       <br />
+      <label>
+        Summary:
+        <textarea name="summary" value={resumeData.basics.summary} onChange={handleChange} />
+      </label>
+      <br />
+      <label>
+        City:
+        <input type="text" name="city" value={resumeData.basics.location.city} onChange={handleChange} />
+      </label>
+      <br />
+      <label>
+        Country Code:
+        <input type="text" name="countryCode" value={resumeData.basics.location.countryCode} onChange={handleChange} />
+      </label>
+      <br />
+      <label>
+        Region:
+        <input type="text" name="region" value={resumeData.basics.location.region} onChange={handleChange} />
+      </label>
+      <br />
+      <h2>Profiles</h2>
+      {resumeData.basics.profiles.map((profile, index) => (
+        <label key={index}>
+          Profile {index + 1}:
+          <input type="text" name={`profile-${index}`} value={profile} onChange={handleChange} />
+        </label>
+      ))}
+      <br />
+      <h2>Work Experience</h2>
+      {resumeData.work.map((work, index) => (
+        <label key={index}>
+          Work {index + 1}:
+          <input type="text" name={`work-${index}`} value={work} onChange={handleChange} />
+        </label>
+      ))}
+      <br />
+      <h2>Education</h2>
+      {resumeData.education.map((education, index) => (
+        <label key={index}>
+          Education {index + 1}:
+          <input type="text" name={`education-${index}`} value={education} onChange={handleChange} />
+        </label>
+      ))}
+      <br />
+      <h2>Awards</h2>
+      {resumeData.awards.map((award, index) => (
+        <label key={index}>
+          Award {index + 1}:
+          <input type="text" name={`award-${index}`} value={award} onChange={handleChange} />
+        </label>
+      ))}
+      <br />
+      <h2>Skills</h2>
+      {resumeData.skills.map((skill, index) => (
+        <label key={index}>
+          Skill {index + 1}:
+          <input type="text" name={`skill-${index}`} value={skill} onChange={handleChange} />
+        </label>
+      ))}
+      <br />
+      <h2>Interests</h2>
+      {resumeData.interests.map((interest, index) => (
+        <label key={index}>
+          Interest {index + 1}:
+          <input type="text" name={`interest-${index}`} value={interest} onChange={handleChange} />
+        </label>
+      ))}
+      <br />
       <button type="submit">Create Resume</button>
-      {error && <div>Error: {error}</div>}
+      {error && <div style={{ color: 'red' }}>{error}</div>}
       {downloadLink && (
-        <div className="download-buttons">
-          <button className="download-pdf-button" onClick={handleDownloadPdf}>Download PDF</button>
-          <button className="download-json-button" onClick={handleDownloadJson}>Download JSON</button>
+        <div>
+          <button onClick={handleDownloadPdf}>Download PDF</button>
+          <button onClick={handleDownloadJson}>Download JSON</button>
         </div>
       )}
     </form>

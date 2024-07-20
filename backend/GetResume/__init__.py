@@ -4,70 +4,67 @@ import azure.functions as func
 from azure.data.tables import TableServiceClient
 import json
 
-# Correctly retrieve the connection string from environment variables
 connection_string = os.environ['AZURE_CONNECTION_STRING']
 
-# Now that 'connection_string' is defined, create the TableServiceClient instance
 table_service = TableServiceClient.from_connection_string(conn_str=connection_string)
 
-counter = 0  # Initialize counter variable
+counter = 0  
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    table_name = "Resumes"
+    table_name = "table1"
 
     if req.method == "GET":
-        # Get the id parameter from the request query string
         id = req.params.get('id')
         logging.info(f"Received id: {id}")
 
-        # Check if the id parameter is provided
         if not id:
             return func.HttpResponse("Please provide an id parameter", status_code=400)
 
         try:
-            # Query the CosmosDB table for the resume data
             table_client = table_service.get_table_client(table_name)
-            # Assuming 'id' is unique and can serve as a RowKey
             entities = table_client.query_entities(f"RowKey eq '{id}'")
             for entity in entities:
                 resume_data = {
                      'id': entity.get('RowKey'),
-                    'name': entity.get('PartitionKey'),  # Adjusted from 'Name' to 'PartitionKey'
-                    'kills': entity.get('Skills'),
-                    'email': entity.get('Email'),
-                    'experience': entity.get('Experience'),
-                    # Ensure all necessary fields are included here
+                    'name': entity.get('PartitionKey'),  
+                    'basics': json.loads(entity.get('Basics')),
+                    'work': json.loads(entity.get('Work')),
+                    'education': json.loads(entity.get('Education')),
+                    'awards': json.loads(entity.get('Awards')),
+                    'kills': json.loads(entity.get('Skills')),
+                    'interests': json.loads(entity.get('Interests')),
                 }
-                # Convert resume_data to JSON and return it
-                return func.HttpResponse(json.dumps(resume_data), mimetype="application/json")
-            # If no entities are found, return a not found response
+                return func.HttpResponse(json.dumps(resume_data, cls=json.JSONEncoder), mimetype="application/json")
             return func.HttpResponse("Resume not found", status_code=404)
         except Exception as e:
             logging.error(f"Error retrieving entity: {e}")
             return func.HttpResponse("Error retrieving resume data", status_code=500)
 
     elif req.method == "POST":
-        global counter  # Declare counter as a global variable
+        global counter  
         try:
-            # Existing POST handling code
             req_body = req.get_json()
             if not req_body:
                 return func.HttpResponse("Please provide a JSON payload", status_code=400)
 
-            name = req_body.get('name')
+            basics = req_body.get('basics')
+            work = req_body.get('work')
+            education = req_body.get('education')
+            awards = req_body.get('awards')
             skills = req_body.get('skills')
-            email = req_body.get('email')
-            experience = req_body.get('experience')
+            interests = req_body.get('interests')
 
             entity = {
-                'PartitionKey': name,
+                'PartitionKey': basics.get('name'),
                 'RowKey': str(counter),
-                'Name': name,
-                'Skills': json.dumps(skills),
-                'Email': email,
-                'Experience': experience
+                'Basics': json.dumps(basics, cls=json.JSONEncoder),
+                'Work': json.dumps(work, cls=json.JSONEncoder),
+                'Education': json.dumps(education, cls=json.JSONEncoder),
+                'Awards': json.dumps(awards, cls=json.JSONEncoder),
+                'Skills': json.dumps(skills, cls=json.JSONEncoder),
+                'Interests': json.dumps(interests, cls=json.JSONEncoder)
             }
 
             counter += 1
