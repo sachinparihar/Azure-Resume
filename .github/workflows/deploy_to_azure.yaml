@@ -26,7 +26,9 @@ jobs:
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
 
     - name: Archive files
-      run: zip -r function.zip.
+      run: |
+        cd backend/
+        zip -r ../function.zip .
 
     - name: Deploy to Azure Function App
       uses: azure/functions-action@v1
