@@ -16,6 +16,8 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+          auth-type: servicePrincipal
 
       - name: Set Azure subscription
         run: |
