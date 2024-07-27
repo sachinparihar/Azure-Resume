@@ -1,4 +1,4 @@
-name: Deploy Azure Function
+name: Azure Login and Deployment
 
 on:
   push:
@@ -6,41 +6,44 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Login to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}      
-      
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Setup Python Environment
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: 'Resolve Project Dependencies Using Pip'
-      shell: bash
-      run: |
-        cd backend/
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+      - name: Set Azure subscription
+        run: |
+          az account set --subscription ${{ secrets.AZURE_CREDENTIALS.subscriptionId }}
 
-    - name: Archive files
-      run: |
-        cd backend/
-        zip -r ../function.zip .
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - name: Deploy to Azure Function App
-      uses: azure/functions-action@v1
-      with:
-        app-name: ${{ secrets.AZURE_FUNCTION_NAME }}
-        package: function.zip
-        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+      - name: 'Resolve Project Dependencies Using Pip'
+        shell: bash
+        run: |
+          cd backend/
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
 
-    - name: Clean up
-      run: rm function.zip
+      - name: Archive files
+        run: |
+          cd backend/
+          zip -r ../function.zip .
+
+      - name: Deploy to Azure Function App
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ secrets.AZURE_FUNCTION_NAME }}
+          package: function.zip
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+      - name: Clean up
+        run: rm function.zip
