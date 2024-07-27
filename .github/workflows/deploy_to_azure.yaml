@@ -12,6 +12,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}      
+      
 
     - name: Setup Python Environment
       uses: actions/setup-python@v4
